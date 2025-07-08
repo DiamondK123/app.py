@@ -1,3 +1,6 @@
+jieba.setLogLevel(20)  # 減少 log 噪音（可選）
+jieba.initialize()
+
 from flask import Flask, render_template_string
 import requests
 from bs4 import BeautifulSoup
