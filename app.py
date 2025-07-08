@@ -1,5 +1,5 @@
 import jieba
-jieba.setLogLevel(20)  # 減少 log 噪音（可選）
+jieba.setLogLevel(20)
 jieba.initialize()
 
 from flask import Flask, render_template_string
@@ -35,9 +35,19 @@ def index():
         top_words = counter.most_common(10)
 
         df = pd.DataFrame(top_words, columns=["詞語", "次數"])
-        fig = go.Figure([go.Bar(x=df["詞語"], y=df["次數"], marker_color='indigo')])
-        fig.update_layout(title="Yahoo奇摩 熱門關鍵詞統計圖", xaxis_title="關鍵詞", yaxis_title="出現次數")
-        plot_html = pio.to_html(fig, full_html=False)
+
+        bar_fig = go.Figure([go.Bar(x=df["詞語"], y=df["次數"], marker_color='indigo')])
+        bar_fig.update_layout(title="Yahoo奇摩 熱門關鍵詞統計圖 (長條圖)", xaxis_title="關鍵詞", yaxis_title="出現次數")
+
+        pie_fig = go.Figure([go.Pie(labels=df["詞語"], values=df["次數"], hole=0.3)])
+        pie_fig.update_layout(title="Yahoo奇摩 熱門關鍵詞統計圖 (圓餅圖)")
+
+        line_fig = go.Figure([go.Scatter(x=df["詞語"], y=df["次數"], mode='lines+markers')])
+        line_fig.update_layout(title="Yahoo奇摩 熱門關鍵詞統計圖 (折線圖)", xaxis_title="關鍵詞", yaxis_title="出現次數")
+
+        bar_html = pio.to_html(bar_fig, full_html=False)
+        pie_html = pio.to_html(pie_fig, full_html=False)
+        line_html = pio.to_html(line_fig, full_html=False)
 
         html_template = '''
         <!DOCTYPE html>
@@ -45,11 +55,13 @@ def index():
         <head><meta charset="UTF-8"><title>Yahoo奇摩 關鍵詞統計</title></head>
         <body>
             <h2 style="text-align:center">🔥 Yahoo奇摩新聞即時爬蟲 + Plotly 圖表</h2>
-            <div style="width:90%;margin:auto">{{ plot_div|safe }}</div>
+            <div style="width:90%;margin:auto">{{ bar_div|safe }}</div>
+            <div style="width:90%;margin:auto;margin-top:50px">{{ pie_div|safe }}</div>
+            <div style="width:90%;margin:auto;margin-top:50px">{{ line_div|safe }}</div>
         </body>
         </html>
         '''
-        return render_template_string(html_template, plot_div=plot_html)
+        return render_template_string(html_template, bar_div=bar_html, pie_div=pie_html, line_div=line_html)
 
     except Exception as e:
         return f"<h3>❌ 程式錯誤：{str(e)}</h3>"
