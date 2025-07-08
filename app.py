@@ -15,16 +15,16 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     try:
-        url = "https://www.ettoday.net/news/news-list.htm"
+        url = "https://tw.news.yahoo.com/"
         headers = {"User-Agent": "Mozilla/5.0"}
         res = requests.get(url, headers=headers, timeout=10)
         res.raise_for_status()
         res.encoding = 'utf-8'
         soup = BeautifulSoup(res.text, "html.parser")
 
-        titles = [t.text.strip() for t in soup.select(".part_list_2 h3 a") if t.text.strip()]
+        titles = [t.text.strip() for t in soup.select("h3") if t.text.strip()]
         if not titles:
-            return "⚠️ 無法抓取 ETtoday 標題，網站可能結構已改變。"
+            return "⚠️ 無法抓取 Yahoo奇摩新聞標題，網站可能結構已改變。"
 
         words = []
         for title in titles:
@@ -36,15 +36,15 @@ def index():
 
         df = pd.DataFrame(top_words, columns=["詞語", "次數"])
         fig = go.Figure([go.Bar(x=df["詞語"], y=df["次數"], marker_color='indigo')])
-        fig.update_layout(title="ETtoday 熱門關鍵詞統計圖", xaxis_title="關鍵詞", yaxis_title="出現次數")
+        fig.update_layout(title="Yahoo奇摩 熱門關鍵詞統計圖", xaxis_title="關鍵詞", yaxis_title="出現次數")
         plot_html = pio.to_html(fig, full_html=False)
 
         html_template = '''
         <!DOCTYPE html>
         <html>
-        <head><meta charset="UTF-8"><title>ETtoday 關鍵詞統計</title></head>
+        <head><meta charset="UTF-8"><title>Yahoo奇摩 關鍵詞統計</title></head>
         <body>
-            <h2 style="text-align:center">🔥 ETtoday 熱門新聞即時爬蟲 + Plotly 圖表</h2>
+            <h2 style="text-align:center">🔥 Yahoo奇摩新聞即時爬蟲 + Plotly 圖表</h2>
             <div style="width:90%;margin:auto">{{ plot_div|safe }}</div>
         </body>
         </html>
