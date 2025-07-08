@@ -1,3 +1,4 @@
+import jieba
 jieba.setLogLevel(20)  # 減少 log 噪音（可選）
 jieba.initialize()
 
@@ -7,7 +8,6 @@ from bs4 import BeautifulSoup
 from collections import Counter
 import plotly.graph_objs as go
 import plotly.io as pio
-import jieba
 import pandas as pd
 
 app = Flask(__name__)
@@ -18,7 +18,7 @@ def index():
         url = "https://www.ettoday.net/news/news-list.htm"
         headers = {"User-Agent": "Mozilla/5.0"}
         res = requests.get(url, headers=headers, timeout=10)
-        res.raise_for_status()  # 確保 HTTP 狀態為 200
+        res.raise_for_status()
         res.encoding = 'utf-8'
         soup = BeautifulSoup(res.text, "html.parser")
 
@@ -54,3 +54,5 @@ def index():
     except Exception as e:
         return f"<h3>❌ 程式錯誤：{str(e)}</h3>"
 
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
